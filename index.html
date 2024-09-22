@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Literacy Game</title>
+   <style>
+   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+:root {
+    --primary-color: #003366;
+    --secondary-color: #004080;
+    --accent-color: #00a8ff;
+    --text-color: #ffffff;
+    --card-color: #e0e0e0;
+    --card-matched-color: #66ff66;
+    --card-text-color: #003366;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+#title {
+    font-size: 2.8em;
+    margin: 30px 0;
+    color: var(--text-color);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    font-weight: 600;
+}
+
+.language-buttons {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+}
+
+.language-buttons button {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    border: 2px solid var(--text-color);
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    font-weight: 300;
+}
+
+.language-buttons button:hover {
+    background-color: var(--accent-color);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.instructions {
+    max-width: 600px;
+    margin: 20px auto;
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    max-width: 800px;
+    margin: 30px auto;
+}
+
+.card {
+    width: 120px;
+    height: 120px;
+    cursor: pointer;
+    background-color: var(--card-color);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--card-text-color);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card.flipped {
+    background-color: var(--accent-color);
+    color: var(--text-color);
+}
+
+.card.matched {
+    background-color: var(--card-matched-color);
+    border-color: #4caf50;
+}
+
+#message {
+    margin: 20px;
+    font-size: 1.2em;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+#next-level {
+    display: none;
+    margin: 20px;
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+#next-level:hover {
+    background-color: #0088cc;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--text-color);
+    border: none;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    text-align: center;
+}
+
+#popup h2 {
+    margin: 0;
+    padding-bottom: 15px;
+    color: var(--primary-color);
+    font-size: 1.8em;
+}
+
+#popup p {
+    margin: 0;
+    color: #333333;
+    font-size: 1.1em;
+    margin-bottom: 20px;
+}
+
+#popup button {
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+#popup button:hover {
+    background-color: #0088cc;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 600px) {
+    #title {
+        font-size: 2.2em;
+    }
+    
+    .board {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+    
+    .card {
+        width: 100px;
+        height: 100px;
+        font-size: 0.9em;
+    }
+}
+    </style>
+</head>
+<body>
+    <h1 id="title">Financial Literacy Game</h1>
+    <div class="language-buttons">
+        <button onclick="setLanguage('en')">English</button>
+        <button onclick="setLanguage('ru')">Русский</button>
+        <button onclick="setLanguage('kz')">Қазақша</button>
+    </div>
+
+    <div class="instructions">
+        <p id="instructions-text">Click on the cards to reveal their content. Match pairs of cards to win. Each card shows a financial term. When you find a matching pair, a detailed description will appear.</p>
+    </div>
+    
+    <div id="game-board" class="board">
+        <!-- Cards will be inserted here by JavaScript -->
+    </div>
+
+    <div id="message"></div>
+    <button id="next-level" onclick="nextLevel()">Next Level</button>
+
+    <div id="popup">
+        <h2 id="popup-title">Congratulations!</h2>
+        <p id="popup-message">You found a matching pair!</p>
+        <button onclick="closePopup()">Close</button>
+    </div>
+
+<script>
+    const texts = {
+        en: {
+            title: "Financial Literacy Game",
+            instructions: "Click on the cards to reveal their content. Match pairs of cards to win. Each card shows a financial term. When you find a matching pair, a detailed description will appear.",
+            congratulations: "Congratulations!",
+            foundPair: "You found a matching pair!",
+            allMatched: "All pairs found! Click 'Next Level' to go to the next level.",
+            allLevelsCompleted: "Amazing job! You have completed all levels and mastered financial literacy! 🎉",
+            cardLabels: {
+                'Savings': 'Savings',
+                'Investment': 'Investment',
+                'Budgeting': 'Budgeting',
+                'Debt': 'Debt',
+                'Interest': 'Interest',
+                'Income': 'Income',
+                'Expenses': 'Expenses',
+                'Profit': 'Profit',
+                'Loan': 'Loan',
+                'Tax': 'Tax'
+            },
+            descriptions: {
+                'Savings': [
+                    "What are savings? - Money that you set aside for the future instead of spending it right away.",
+                    "Why is saving important? - Savings can help you in tough times and allow you to achieve long-term goals.",
+                    "How to start saving? - Determine how much you can save each month and open a savings account.",
+                    "Interest on savings - Many banks offer interest on your savings. This is called an 'interest rate.'",
+                    "Emergency fund - Keep money for emergencies, such as unexpected expenses or job loss.",
+                    "Savings goals - Set specific goals for your savings, such as buying toys or traveling.",
+                    "Use financial management apps or keep manual records to track how much you've saved and ensure you're meeting your savings goals."
+                ],
+                'Investment': [
+                    "Types of investments - These can include stocks, bonds, real estate, startups, and more.",
+                    "Investment risks - Investments can yield both profits and losses. It's important to understand the risks.",
+                    "Long-term investments - Investing money for a long period can yield greater returns.",
+                    "Diversification - Spread your investments across different assets to reduce risk.",
+                    "Income from investments - This can come in the form of interest, dividends, or appreciation in asset value.",
+                    "How to start investing? - Find a reliable financial advisor and start with small amounts."
+                ],
+                'Budgeting': [
+                    "What is budgeting? - The process of planning your income and expenses to manage your money effectively.",
+                    "How to create a budget? - First, determine your income, then list all your expenses and set limits.",
+                    "Why is budgeting important? - Helps control spending and avoid debt.",
+                    "Reviewing your budget - Regularly check your budget and make adjustments as needed.",
+                    "Planning long-term goals - Budgeting helps plan for major expenses like buying a house or education.",
+                    "Using budgeting apps - Various apps can help track your expenses and income, making budgeting easier."
+                ],
+                'Debt': [
+                    "What is debt? - Money that you owe to other people or organizations.",
+                    "How to manage debt? - Pay off debts on time and try not to accumulate new ones.",
+                    "Types of debt - Loans, credit card debt, mortgages, and others.",
+                    "Credit rating - High levels of debt can negatively affect your credit score, making it harder to get new loans.",
+                    "Debt repayment methods - Use the 'snowball' method (pay off debts from smallest to largest) or the 'avalanche' method (pay off debts with the highest interest rate first)."
+                ],
+                'Interest': [
+                    "What is interest? - The amount you pay for borrowing money or receive for saving money.",
+                    "Compound interest - Interest calculated on the initial principal and also on the accumulated interest.",
+                    "Interest rates and credit cards - Credit cards often have high interest rates, making debt expensive.",
+                    "Comparing interest rates - When choosing a loan or deposit, compare interest rates to find the best deal."
+                ],
+                'Income': [
+                    "What is income? - Money you earn from work, business, or investments.",
+                    "Types of income - Salary, bonuses, investment income, rental income.",
+                    "Passive income - Income earned without active involvement, such as rental income or dividends from stocks."
+                ],
+                'Expenses': [
+                    "What are expenses? - Money spent on various needs like food, housing, entertainment.",
+                    "Managing expenses - Track your spending and try to reduce unnecessary expenses."
+                ],
+                'Profit': [
+                    "What is profit? - The difference between income and expenses that remains after selling goods or services.",
+                    "How to increase profit? - Increase income or reduce expenses to improve your profit margin."
+                ],
+                'Loan': [
+                    "What is a loan? - Money borrowed that you must repay with interest."
+                ],
+                'Tax': [
+                    "What is tax? - Money you must pay to the government to fund public services."
+                ]
+            }
+        },
+        ru: {
+                title: "Игра по финансовой грамотности",
+                instructions: "Нажимайте на карточки, чтобы открыть их содержимое. Найдите пары карточек, чтобы выиграть. Каждая карточка отображает финансовый термин. Когда вы найдете подходящую пару, появится подробное описание.",
+                congratulations: "Поздравляем!",
+                foundPair: "Вы нашли пару карточек!",
+                allMatched: "Все пары найдены! Нажмите 'Next Level', чтобы перейти на следующий уровень.",
+                allLevelsCompleted: "Отличная работа! Вы завершили все уровни и освоили финансовую грамотность! 🎉",
+                cardLabels: {
+                'Savings': 'Savings',
+                'Investment': 'Investment',
+                'Budgeting': 'Budgeting',
+                'Debt': 'Debt',
+                'Interest': 'Interest',
+                'Income': 'Income',
+                'Expenses': 'Expenses',
+                'Profit': 'Profit',
+                'Loan': 'Loan',
+                'Tax': 'Tax'
+                },
+                descriptions: {
+                'Savings': [
+                    "Что такое сбережения? - Деньги, которые вы откладываете на будущее вместо того, чтобы тратить их сразу.",
+                    "Почему важно сберегать? - Сбережения могут помочь вам в трудные времена и позволить достичь долгосрочных целей.",
+                    "Как начать сберегать? - Определите, сколько вы можете откладывать каждый месяц, и откройте сберегательный счет.",
+                    "Проценты на сбережения - Многие банки предлагают проценты на ваши сбережения. Это называется 'процентной ставкой.'",
+                    "Фонд на случай непредвиденных обстоятельств - Держите деньги на случай непредвиденных расходов или потери работы.",
+                    "Цели сбережений - Установите конкретные цели для ваших сбережений, такие как покупка игрушек или путешествия.",
+                    "Используйте финансовые приложения или ведите ручные записи, чтобы отслеживать, сколько вы сберегли, и убедитесь, что вы достигаете своих целей по сбережениям."
+                ],
+                'Investment': [
+                    "Типы инвестиций - Это могут быть акции, облигации, недвижимость, стартапы и др.",
+                    "Риски инвестиций - Инвестиции могут приносить как прибыль, так и убытки. Важно понимать риски.",
+                    "Долгосрочные инвестиции - Инвестирование денег на длительный срок может принести большую прибыль.",
+                    "Диверсификация - Распределите свои инвестиции по различным активам, чтобы снизить риск.",
+                    "Доход от инвестиций - Это может быть в виде процентов, дивидендов или увеличения стоимости активов.",
+                    "Как начать инвестировать? - Найдите надежного финансового консультанта и начните с небольших сумм."
+                ],
+                'Budgeting': [
+                    "Как создать бюджет? - Сначала определите ваш доход, затем перечислите все ваши расходы и установите лимиты.",
+                    "Что такое бюджетирование? - Процесс планирования вашего дохода и расходов для эффективного управления деньгами.",
+                    "Почему важно бюджетировать? - Помогает контролировать расходы и избегать долгов.",
+                    "Проверка бюджета - Регулярно проверяйте свой бюджет и при необходимости вносите изменения.",
+                    "Планирование долгосрочных целей - Бюджетирование помогает планировать крупные расходы, такие как покупка дома или образование.",
+                    "Использование приложений для бюджетирования - Различные приложения могут помочь отслеживать ваши расходы и доходы, упрощая бюджетирование."
+                ],
+                'Debt': [
+                    "Что такое долг? - Деньги, которые вы должны другим людям или организациям.",
+                    "Как управлять долгом? - Выплачивайте долги вовремя и старайтесь не накапливать новые.",
+                    "Типы долгов - Кредиты, долги по кредитным картам, ипотеки и другие.",
+                    "Кредитный рейтинг - Высокий уровень долгов может негативно повлиять на ваш кредитный рейтинг, усложнив получение новых кредитов.",
+                    "Методы погашения долгов - Используйте метод 'снежного кома' (выплачивайте долги от наименьшего к наибольшему) или метод 'лавины' (выплачивайте долги с наивысшей процентной ставкой первым)."
+                ],
+                'Interest': [
+                    "Что такое процент? - Сумма, которую вы платите за заемные деньги или получаете за сбережения.",
+                    "Сложные проценты - Проценты, рассчитанные на первоначальный капитал и накопленные проценты.",
+                    "Процентные ставки и кредитные карты - Кредитные карты часто имеют высокие процентные ставки, что делает долг дорогим.",
+                    "Сравнение процентных ставок - При выборе кредита или депозита сравните процентные ставки, чтобы найти лучшее предложение."
+                ],
+                'Income': [
+                    "Что такое доход? - Деньги, которые вы зарабатываете от работы, бизнеса или инвестиций.",
+                    "Типы доходов - Зарплата, бонусы, доход от инвестиций, аренда.",
+                    "Пассивный доход - Доход, получаемый без активного участия, например, доход от аренды или дивиденды от акций."
+                ],
+                'Expenses': [
+                    "Что такое расходы? - Деньги, потраченные на различные нужды, такие как еда, жилье, развлечения.",
+                    "Управление расходами - Отслеживайте свои расходы и старайтесь сократить ненужные затраты."
+                ],
+                'Profit': [
+                    "Что такое прибыль? - Разница между доходами и расходами, которая остается после продажи товаров или услуг.",
+                    "Как увеличить прибыль? - Увеличьте доход или сократите расходы, чтобы улучшить вашу прибыль."
+                ],
+                'Loan': [
+                    "Что такое кредит? - Деньги, которые вы заняли и должны вернуть с процентами."
+                ],
+                'Tax': [
+                    "Что такое налог? - Деньги, которые вы обязаны платить государству для финансирования общественных услуг."
+                ]
+            }
+            },
+        kz: {   
+                title: "Қаржылық сауаттылық ойыны",
+                instructions: "Карточкаларды ашу үшін оларды басыңыз. Жеңіске жету үшін карточкаларды жұптастырыңыз. Әр карточка қаржы терминін көрсетеді. Сіз дұрыс жұп тапқан кезде, толық сипаттама пайда болады.",
+                congratulations: "Құттықтаймыз!",
+                foundPair: "Сіз жұп таптыңыз:",
+                allMatched: "Барлық жұптар табылды! Келесі деңгейге өту үшін 'Next Level' түймесін басыңыз.",
+                allLevelsCompleted: "Керемет жұмыс! Сіз барлық деңгейлерді аяқтап, қаржылық сауаттылықты меңгердіңіз! 🎉",
+                cardLabels: {
+                'Savings': 'Savings',
+                'Investment': 'Investment',
+                'Budgeting': 'Budgeting',
+                'Debt': 'Debt',
+                'Interest': 'Interest',
+                'Income': 'Income',
+                'Expenses': 'Expenses',
+                'Profit': 'Profit',
+                'Loan': 'Loan',
+                'Tax': 'Tax'
+                },
+                descriptions: {
+                    'Savings': [
+                        'Жинақтар дегеніміз не? - Қазір жұмсамайтын, болашақ үшін сақтайтын ақша.',
+                        'Жинақтау неге маңызды? - Жинақтар қиын жағдайларда көмек көрсетеді және ұзақ мерзімді мақсаттарға жетуге мүмкіндік береді.',
+                        'Жинақтауды қалай бастау керек? - Әр айда сақтайтын соманы анықтаңыз және жинақ шотын ашыңыз.',
+                        'Жинақ бойынша пайыздар - Көптеген банктер жинақтарыңызға пайыздар ұсынады. Бұл "пайыздық мөлшерлеме" деп аталады.',
+                        'Шұғыл қор - Төтенше жағдайлар үшін ақша сақтаңыз, мысалы, күтпеген шығыстар немесе жұмыссыздық.',
+                        'Жинақтау мақсаттары - Жинақтарыңыз үшін нақты мақсаттар қойыңыз, мысалы, ойыншық сатып алу немесе саяхаттау.'
+                    ],
+                    'Investment': [
+                        'Инвестициялар дегеніміз не? - Ақшаны активтерге салу арқылы табыс алу немесе олардың құнын арттыру.',
+                        'Инвестиция түрлері - Бұл акциялар, облигациялар, жылжымайтын мүлік, стартаптар және тағы басқа болуы мүмкін.',
+                        'Инвестициялардың тәуекелдері - Инвестициялар пайда мен шығын әкелуі мүмкін. Тәуекелдерді түсіну маңызды.',
+                        'Ұзақ мерзімді инвестициялар - Ақшаны ұзақ мерзімге салу үлкен табыс әкелуі мүмкін.',
+                        'Диверсификация - Инвестицияларды әр түрлі активтерге тарату тәуекелдерді азайтады.',
+                        'Инвестициялардан табыс - Бұл пайыздар, дивидендтер немесе активтердің өсуі түрінде болуы мүмкін.',
+                        'Инвестициялауды қалай бастау керек? - Сенімді қаржылық кеңесшіні тауып, аз мөлшермен бастаңыз.'
+                    ],
+                    'Budgeting': [
+                        'Бюджеттеу дегеніміз не? - Ақшаңызды тиімді басқару үшін табыстарыңыз бен шығыстарыңызды жоспарлау процесі.', // Деңгей 1
+                        'Бюджетті қалай құру керек? - Алдымен табыстарыңызды анықтаңыз, содан кейін барлық шығыстарыңызды тізіп, шектеулер белгілеңіз.', // Деңгей 2
+                        'Бюджеттеу неге маңызды? - Шығыстарыңызды бақылауға және қарыздан аулақ болуға көмектеседі.', // Деңгей 3
+                        'Бюджетті тексеру - Бюджетті үнемі тексеріп, қажет болған жағдайда түзетулер енгізіңіз.', // Деңгей 4
+                        'Ұзақ мерзімді мақсаттарды жоспарлау - Бюджеттеу үлкен шығыстарды, мысалы, үй сатып алу немесе білім алу сияқты жоспарлауға көмектеседі.', // Деңгей 5
+                        'Бюджеттеу қосымшаларын пайдалану - Шығыстарыңыз бен табыстарыңызды бақылауға көмектесетін әртүрлі қосымшалар бар.' // Деңгей 6
+                    ],
+                    'Debt': [
+                        'Қарыз дегеніміз не? - Басқа адамдарға немесе ұйымдарға қарызға алған ақша.', // Деңгей 1
+                        'Қарызды қалай басқару керек? - Қарыздарды уақтылы төлеңіз және жаңаларын жинамауға тырысыңыз.', // Деңгей 2
+                        'Қарыз түрлері - Несие, кредиттік карталар бойынша қарыздар, ипотекалар және басқалар.', // Деңгей 3
+                        'Несие рейтинг - Жоғары қарыз деңгейлері несие рейтингке теріс әсер етуі мүмкін, жаңа несиелер алу қиын болады.', // Деңгей 4
+                        'Қарызды төлеу әдістері - "Қар жамылғысы" әдісін (қарыздарды ең кіші мөлшерден үлкеніне дейін төлеңіз) немесе "қарқынды" әдісін (ең жоғары пайыздық мөлшерлемесі бар қарыздарды бірінші төлеңіз) пайдаланыңыз.' // Деңгей 5
+                    ],
+                    'Interest': [
+                        'Пайыз дегеніміз не? - Қарызға алынған ақша үшін төлейтін немесе жинақтарға алатын сомасы.',
+        ]}}
+    };
+
+    let currentLanguage = 'en';
+
+    const levels = [
+        { grid: [2, 2], cards: ['Savings', 'Investment'] }, // Level 1
+        { grid: [2, 3], cards: ['Savings', 'Investment', 'Budgeting'] }, // Level 2
+        { grid: [4, 2], cards: ['Savings', 'Investment', 'Budgeting', 'Debt'] }, // Level 3
+        { grid: [5, 2], cards: ['Savings', 'Investment', 'Budgeting', 'Debt', 'Interest'] }, // Level 4
+        { grid: [4, 3], cards: ['Savings', 'Investment', 'Budgeting', 'Debt', 'Interest', 'Income'] }, // Level 5
+        { grid: [4, 4], cards: ['Savings', 'Investment', 'Budgeting', 'Debt', 'Interest', 'Income', 'Expenses', 'Profit'] }, // Level 6
+        { grid: [4, 5], cards: ['Savings', 'Investment', 'Budgeting', 'Debt', 'Interest', 'Income', 'Expenses', 'Profit', 'Loan', 'Tax'] } // Level 7
+    ];
+
+    let currentLevel = 0;
+    let firstCard = null;
+    let secondCard = null;
+    let matchedPairs = 0;
+
+    function setLanguage(language) {
+        currentLanguage = language;
+        document.getElementById('title').innerText = texts[currentLanguage].title;
+        document.getElementById('instructions-text').innerText = texts[currentLanguage].instructions;
+        document.getElementById('message').innerText = '';
+        initializeGame();
+    }
+    
+function checkForMatch() {
+    if (firstCard.dataset.value === secondCard.dataset.value) {
+        firstCard.classList.add('matched');
+        secondCard.classList.add('matched');
+
+        // Define level adjustments for each term
+        const levelAdjustments = {
+            'Budgeting': -1,
+            'Debt': -2,
+            'Interest': -3,
+            'Income': -4,
+            'Expenses': -5,
+            'Profit': -5,
+            'Loan': -6,
+            'Tax': -6
+        };
+
+        // Determine the level index for description
+        let levelIndex = currentLevel; // Default to current level
+
+        if (levelAdjustments[firstCard.dataset.value] !== undefined) {
+            levelIndex += levelAdjustments[firstCard.dataset.value]; // Apply the specific adjustment
+            levelIndex = Math.max(0, levelIndex); // Ensure level index doesn't go below 0
+        }
+
+        showPopup(texts[currentLanguage].congratulations, texts[currentLanguage].descriptions[firstCard.dataset.value][levelIndex]);
+        matchedPairs++;
+        if (matchedPairs === levels[currentLevel].cards.length) {
+            document.getElementById('message').innerText = texts[currentLanguage].allMatched;
+            document.getElementById('message').style.display = 'block';
+            enableNextLevelButton(); // Enable the next level button
+        }
+    } else {
+        firstCard.classList.remove('flipped');
+        secondCard.classList.remove('flipped');
+        firstCard.innerHTML = '';
+        secondCard.innerHTML = '';
+    }
+    firstCard = null;
+    secondCard = null;
+}
+
+function enableNextLevelButton() {
+    document.getElementById('next-level').style.display = 'block';
+    document.getElementById('next-level').disabled = false;
+}
+
+function disableNextLevelButton() {
+    document.getElementById('next-level').style.display = 'none';
+    document.getElementById('next-level').disabled = true;
+}
+
+function initializeGame() {
+    const level = levels[currentLevel];
+    const board = document.getElementById('game-board');
+    board.innerHTML = '';
+    matchedPairs = 0;
+    disableNextLevelButton(); // Disable the next level button initially
+
+    // Hide any previous level completion messages
+    document.getElementById('message').style.display = 'none';
+
+    const cardValues = [...level.cards, ...level.cards];
+    shuffle(cardValues);
+
+    const [rows, cols] = level.grid;
+    board.style.gridTemplateColumns = `repeat(${cols}, 100px)`;
+    board.style.gridTemplateRows = `repeat(${rows}, 100px)`;
+
+    for (let i = 0; i < rows * cols; i++) {
+        const cardElement = document.createElement('div');
+        cardElement.className = 'card';
+        cardElement.dataset.value = cardValues[i];
+        cardElement.addEventListener('click', flipCard);
+        board.appendChild(cardElement);
+    }
+}
+
+
+function nextLevel() {
+    currentLevel++;
+    if (currentLevel >= levels.length) {
+        document.getElementById('message').innerText = texts[currentLanguage].allLevelsCompleted;
+        document.getElementById('message').style.display = 'block';
+        document.getElementById('next-level').style.display = 'none';
+        return;
+    }
+    initializeGame();
+}
+
+    function flipCard() {
+        if (firstCard && secondCard) return;
+        const cardElement = this;
+
+        if (cardElement === firstCard || cardElement.classList.contains('flipped') || cardElement.classList.contains('matched')) return;
+
+        cardElement.classList.add('flipped');
+        cardElement.innerHTML = texts[currentLanguage].cardLabels[cardElement.dataset.value];
+
+        if (!firstCard) {
+            firstCard = cardElement;
+            return;
+        }
+
+        secondCard = cardElement;
+        setTimeout(checkForMatch, 1000);
+    }
+
+
+    function showPopup(title, description) {
+        const popup = document.getElementById('popup');
+        document.getElementById('popup-title').innerText = texts[currentLanguage].congratulations;
+        document.getElementById('popup-message').innerText = description;
+        popup.style.display = 'block';
+    }
+
+    function closePopup() {
+        document.getElementById('popup').style.display = 'none';
+    }
+
+     function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+    // Initialize game on page load
+    initializeGame();
+</script>
+</body>
+</html>
